@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats - {{ nom_site }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">{{ nom_site }}</div>
+    <input type="checkbox" id="burger-toggle">
+    <label for="burger-toggle" class="burger-label">&#9776;</label>
+    <nav class="main-nav">
+      <a href="{{ url_for('index') }}">Accueil</a>
+      <a href="#">Rendez-vous</a>
+      <a href="#">Connexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="features">
+  <div class="container">
+    <h2>Résultats de votre recherche</h2>
+
+    {% for praticien in praticiens %}
+    <div class="praticien-card">
+      <span class="distance-badge">{{ praticien.distance }} km</span>
+      <img src="{{ url_for('static', filename='img/doctor.png') }}" alt="Praticien">
+      <div class="info">
+        <h3>{{ praticien.nom }}</h3>
+        <p>{{ praticien.specialite }} à {{ praticien.ville }}</p>
+        <a href="{{ url_for('fiche_praticien', id=praticien.id) }}" class="button">Voir profil</a>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+  </div>
+</footer>
+
+</body>
+</html>
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+    <nav class="footer-links">
+      <a href="{{ url_for('cgu') }}">CGU</a>
+      <span>|</span>
+      <a href="{{ url_for('mentions_legales') }}">Mentions légales</a>
+      <span>|</span>
+      <a href="{{ url_for('politique_confidentialite') }}">Confidentialité</a>
+      <span>|</span>
+      <a href="{{ url_for('parametres_cookies') }}">Cookies</a>
+    </nav>
+  </div>
+</footer>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ nom_site }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="user-avatar">
+          {{ session.user_name.split(' ').map(part => part[0]).join('') }}
+        </div>
+        <div class="user-info">
+          <h3>{{ session.user_name }}</h3>
+          <p>{{ session.user_email }}</p>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="active">
+          <i class="fas fa-calendar-alt"></i>
+          Mes rendez-vous
+        </a>
+        <a href="#">
+          <i class="fas fa-user-md"></i>
+          Mes médecins
+        </a>
+        <a href="#">
+          <i class="fas fa-file-medical"></i>
+          Mes documents
+        </a>
+        <a href="#">
+          <i class="fas fa-cog"></i>
+          Paramètres
+        </a>
+        <a href="{{ url_for('logout') }}" class="logout">
+          <i class="fas fa-sign-out-alt"></i>
+          Déconnexion
+        </a>
+      </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Tableau de bord</h1>
+        <div class="header-actions">
+          <button class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau rendez-vous
+          </button>
+        </div>
+      </header>
+      
+      <div class="dashboard-cards">
+        <div class="card">
+          <div class="card-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="card-content">
+            <h3>Prochain rendez-vous</h3>
+            <p class="card-text">Aucun rendez-vous à venir</p>
+            <a href="#" class="card-link">Voir tous les rendez-vous</a>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-icon">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <div class="card-content">
+            <h3>Médecins favoris</h3>
+            <p class="card-text">Aucun médecin enregistré</p>
+            <a href="#" class="card-link">Trouver un médecin</a>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-icon">
+            <i class="fas fa-file-prescription"></i>
+          </div>
+          <div class="card-content">
+            <h3>Ordonnances</h3>
+            <p class="card-text">Aucune ordonnance disponible</p>
+            <a href="#" class="card-link">Voir les documents</a>
+          </div>
+        </div>
+      </div>
+      
+      <section class="upcoming-appointments">
+        <h2>Mes prochains rendez-vous</h2>
+        <div class="appointments-list">
+          <div class="empty-state">
+            <i class="far fa-calendar-plus"></i>
+            <p>Vous n'avez pas de rendez-vous à venir</p>
+            <a href="{{ url_for('liste_praticiens') }}" class="btn btn-outline">
+              Prendre rendez-vous
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <section class="recent-activity">
+        <h2>Activité récente</h2>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="activity-content">
+              <p>Vous avez créé votre compte</p>
+              <span class="activity-date">Aujourd'hui</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script>
+    // Script pour le tableau de bord
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gestion du menu responsive
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          document.querySelector('.sidebar').classList.toggle('active');
+        });
+      }
+      
+      // Initialisation des tooltips
+      const tooltipTriggers = document.querySelectorAll('[data-tooltip]');
+      tooltipTriggers.forEach(trigger => {
+        trigger.addEventListener('mouseenter', showTooltip);
+        trigger.addEventListener('mouseleave', hideTooltip);
+      });
+      
+      function showTooltip(e) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = this.getAttribute('data-tooltip');
+        document.body.appendChild(tooltip);
+        
+        const rect = this.getBoundingClientRect();
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+        tooltip.style.left = `${rect.left + (this.offsetWidth - tooltip.offsetWidth) / 2}px`;
+        
+        this.tooltip = tooltip;
+      }
+      
+      function hideTooltip() {
+        if (this.tooltip) {
+          this.tooltip.remove();
+          this.tooltip = null;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

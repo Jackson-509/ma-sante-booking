@@ -1,0 +1,116 @@
+<!-- reserver.html - Planning style Doctolib -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prendre rendez-vous - {{ praticien.nom }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">{{ nom_site }}</div>
+
+    <!-- Menu burger mobile -->
+    <input type="checkbox" id="burger-toggle">
+    <label for="burger-toggle" class="burger-label">&#9776;</label>
+
+    <nav class="main-nav">
+      <a href="{{ url_for('index') }}">Accueil</a>
+      <a href="{{ url_for('liste_praticiens') }}">Professionnels</a>
+        <a href="{{ url_for('reserver', id=praticien.id) }}">Rendez-vous</a>
+        <a href="{{ url_for('login') }}">Connexion</a>
+
+    </nav>
+  </div>
+</header>
+
+<main class="booking-page">
+  <div class="container">
+    <a href="{{ url_for('liste_praticiens') }}" class="back-button">
+      &larr; Retour à la liste des professionnels
+    </a>
+    
+    <div class="booking-container">
+      <div class="booking-header">
+        <h1>Prendre rendez-vous</h1>
+        <p class="booking-subtitle">Sélectionnez une date et un créneau horaire pour votre consultation</p>
+      </div>
+      
+      <div class="booking-grid">
+        <!-- Carte praticien -->
+        <div class="booking-card">
+          <div class="card-header">
+            <div class="praticien-avatar">
+              <img src="{{ praticien.photo }}" alt="{{ praticien.nom }}">
+            </div>
+            <div class="praticien-info">
+              <h2>Dr {{ praticien.nom }}</h2>
+              <p class="specialty">{{ praticien.specialite }}</p>
+              <p class="location"><i class="fas fa-map-marker-alt"></i> {{ praticien.adresse }}</p>
+              <p class="price-info"><i class="fas fa-tag"></i> {{ praticien.tarif }}</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="info-note">
+              <i class="fas fa-info-circle"></i>
+              <span>Les créneaux affichés correspondent à la disponibilité du Dr {{ praticien.nom.split(' ')[-1] }}.</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Calendrier des créneaux -->
+        <div class="booking-calendar">
+          <div class="calendar-header">
+            <h3><i class="far fa-calendar-alt"></i> Disponibilités</h3>
+            <div class="calendar-navigation">
+              <button id="prev-week" class="nav-arrow" aria-label="Semaine précédente">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <p class="current-month">{{ planning[0].date.split('/')[1] }}/{{ planning[0].date.split('/')[2] }}</p>
+              <button id="next-week" class="nav-arrow" aria-label="Semaine suivante">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="planning-grid">
+            {% for jour in planning %}
+            <div class="planning-col">
+              <div class="day-name">{{ jour.nom }}</div>
+              <div class="day-date">{{ jour.date.split('/')[0] }}</div>
+              <div class="time-slots">
+                {% if jour.creneaux %}
+                  {% for h in jour.creneaux %}
+                    <button class="slot-btn" data-date="{{ jour.date }}" data-heure="{{ h }}">
+                      {{ h }}
+                    </button>
+                  {% endfor %}
+                {% else %}
+                  <div class="no-slots">Complet</div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <div class="calendar-footer">
+            <p><i class="fas fa-sync-alt"></i> Les créneaux se mettent à jour en temps réel</p>
+          </div>
+        </div>
+      </div>
+    </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/planning.js') }}"></script>
+</body>
+</html>

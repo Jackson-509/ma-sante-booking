@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ praticien.nom }} - {{ nom_site }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">{{ nom_site }}</div>
+    <nav class="main-nav">
+      <a href="{{ url_for('index') }}">Accueil</a>
+      <a href="{{ url_for('liste_praticiens') }}">Praticiens</a>
+    </nav>
+  </div>
+</header>
+
+<main class="features">
+  <div class="container">
+    <div class="fiche-praticien">
+      <img src="{{ url_for('static', filename='img/doctor.png') }}" alt="Photo de {{ praticien.nom }}" class="photo-praticien">
+
+      <div class="infos">
+        <h1>{{ praticien.nom }}</h1>
+        <p class="specialite">{{ praticien.specialite }}</p>
+        <p class="ville">{{ praticien.ville }}</p>
+        <p class="description">{{ praticien.description }}</p>
+
+        <a href="{{ url_for('reserver', id=praticien.id) }}" class="button">Prendre rendez-vous</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+  </div>
+</footer>
+
+</body>
+</html>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+    <nav class="footer-links">
+      <a href="{{ url_for('cgu') }}">CGU</a>
+      <span>|</span>
+      <a href="{{ url_for('mentions_legales') }}">Mentions légales</a>
+      <span>|</span>
+      <a href="{{ url_for('politique_confidentialite') }}">Confidentialité</a>
+      <span>|</span>
+      <a href="{{ url_for('parametres_cookies') }}">Cookies</a>
+    </nav>
+  </div>
+</footer>

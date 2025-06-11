@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ nom_site }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+</head>
+<body {% block body_class %}{% endblock %}>
+  <header>
+    <div class="container nav">
+      <a href="{{ url_for('index') }}" class="logo">MaSanté</a>
+      <input type="checkbox" id="burger-toggle">
+      <label for="burger-toggle" class="burger-label">&#9776;</label>
+      <nav class="main-nav">
+        <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>
+          <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="{{ url_for('liste_praticiens') }}" {% if request.endpoint == 'liste_praticiens' %}class="active"{% endif %}>
+          <i class="fas fa-user-md"></i> Professionnels
+        </a>
+        {% if 'user_id' in session %}
+          <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
+            <i class="fas fa-calendar-alt"></i> Mes RDV
+          </a>
+          <a href="{{ url_for('mes_documents') }}" {% if request.endpoint == 'mes_documents' %}class="active"{% endif %}>
+            <i class="fas fa-file-medical"></i> Mes documents
+          </a>
+          <a href="{{ url_for('profile') }}" class="user-avatar-small">
+            {% for part in session.user_name.split(' ') %}{{ part[0] }}{% endfor %}
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline">
+            <i class="fas fa-sign-in-alt"></i> Connexion
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; {{ now.year }} MaSanté - Tous droits réservés</p>
+      <nav class="footer-links">
+        <a href="{{ url_for('cgu') }}">CGU</a>
+        <span>|</span>
+        <a href="{{ url_for('mentions_legales') }}">Mentions légales</a>
+        <span>|</span>
+        <a href="{{ url_for('politique_confidentialite') }}">Confidentialité</a>
+        <span>|</span>
+        <a href="{{ url_for('parametres_cookies') }}">Cookies</a>
+        <span>|</span>
+        <a href="{{ url_for('sitemap') }}">Plan du site</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

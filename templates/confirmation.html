@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de rendez-vous - {{ praticien.nom }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="container nav">
+        <div class="logo">{{ nom_site }}</div>
+
+        <!-- Menu burger mobile -->
+        <input type="checkbox" id="burger-toggle">
+        <label for="burger-toggle" class="burger-label">&#9776;</label>
+
+        <nav class="main-nav">
+            <a href="{{ url_for('index') }}">Accueil</a>
+            <a href="{{ url_for('liste_praticiens') }}">Professionnels</a>
+            <a href="{{ url_for('reserver', id=praticien.id) }}">Rendez-vous</a>
+            <a href="{{ url_for('login') }}">Connexion</a>
+        </nav>
+    </div>
+</header>
+
+<main class="confirmation-page">
+    <div class="container">
+        <a href="{{ url_for('reserver', id=praticien.id) }}" class="back-button">
+            &larr; Retour au calendrier
+        </a>
+        
+        <div class="confirmation-container">
+            <!-- En-tête avec icône de confirmation -->
+            <div class="confirmation-header">
+                <div class="confirmation-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#4CAF50" width="48" height="48">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <h1>Rendez-vous confirmé !</h1>
+                <p class="confirmation-subtitle">Votre rendez-vous a été enregistré avec succès. Un email de confirmation vous a été envoyé.</p>
+            </div>
+
+            <div class="confirmation-grid">
+                <!-- Carte praticien -->
+                <div class="confirmation-card">
+                    <div class="card-header">
+                        <div class="praticien-avatar">
+                            <img src="{{ praticien.photo }}" alt="{{ praticien.nom }}">
+                        </div>
+                        <div class="praticien-info">
+                            <h3>Dr {{ praticien.nom }}</h3>
+                            <p class="specialty">{{ praticien.specialite }}</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">Service :</span>
+                            <span class="info-value">{{ service.nom }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date :</span>
+                            <span class="info-value">{{ date }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Heure :</span>
+                            <span class="info-value">{{ heure }}</span>
+                        </div>
+                        <div class="info-row highlight">
+                            <span class="info-label">Prix :</span>
+                            <span class="info-value">{{ service.prix }} €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte informations personnelles -->
+                <div class="confirmation-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-circle"></i> Vos informations</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">Nom :</span>
+                            <span class="info-value">{{ nom }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Prénom :</span>
+                            <span class="info-value">{{ prenom }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email :</span>
+                            <span class="info-value">{{ email }}</span>
+                        </div>
+                        <div class="info-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Un rappel vous sera envoyé 24h avant le rendez-vous.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="confirmation-actions">
+                <a href="{{ url_for('reserver', id=praticien.id) }}" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus"></i> Prendre un autre rendez-vous
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Retour à l'accueil
+                </a>
+            </div>
+
+            <div class="confirmation-footer">
+                <p><i class="fas fa-phone-alt"></i> Pour toute modification, veuillez nous contacter au 01 23 45 67 89</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+    </div>
+</footer>
+
+</body>
+</html>

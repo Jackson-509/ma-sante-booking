@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Documents - MaSanté</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.css">
+</head>
+<body class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    {% include 'dashboard_sidebar.html' %}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Mes Documents</h1>
+        <div class="header-actions">
+          <button id="uploadBtn" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Téléverser un document
+          </button>
+        </div>
+      </header>
+      
+      <div class="documents-container">
+        <!-- Filtres et recherche -->
+        <div class="documents-filters">
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="documentSearch" placeholder="Rechercher un document...">
+          </div>
+          
+          <div class="filter-group">
+            <label for="documentType">Type :</label>
+            <select id="documentType" class="form-select">
+              <option value="all">Tous les types</option>
+              <option value="ordonnance">Ordonnances</option>
+              <option value="analyse">Analyses médicales</option>
+              <option value="compte-rendu">Comptes-rendus</option>
+              <option value="imagerie">Imagerie médicale</option>
+              <option value="autre">Autres documents</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="sortBy">Trier par :</label>
+            <select id="sortBy" class="form-select">
+              <option value="date-desc">Date (plus récent)</option>
+              <option value="date-asc">Date (plus ancien)</option>
+              <option value="name-asc">Nom (A-Z)</option>
+              <option value="name-desc">Nom (Z-A)</option>
+              <option value="type">Type</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Zone de dépôt -->
+        <div id="dropzone" class="dropzone-container">
+          <div class="dropzone-content">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Glissez vos fichiers ici</h3>
+            <p>ou</p>
+            <button class="btn btn-outline">Parcourir les fichiers</button>
+            <p class="small">Formats acceptés : PDF, JPG, PNG, DOCX (max. 10 Mo)</p>
+          </div>
+        </div>
+        
+        <!-- Liste des documents -->
+        <div class="documents-list">
+          <div class="documents-header">
+            <div class="document-name">Nom du document</div>
+            <div class="document-type">Type</div>
+            <div class="document-date">Date d'ajout</div>
+            <div class="document-size">Taille</div>
+            <div class="document-actions">Actions</div>
+          </div>
+          
+          <div class="documents-body">
+            {% if documents %}
+              {% for doc in documents %}
+              <div class="document-item" data-type="{{ doc.type }}" data-date="{{ doc.date_ajout }}" data-name="{{ doc.nom }}">
+                <div class="document-name">
+                  <i class="fas fa-{{ 'file-pdf' if doc.type == 'pdf' else 'file-image' if doc.type in ['jpg', 'jpeg', 'png'] else 'file-alt' }}"></i>
+                  <span>{{ doc.nom }}</span>
+                </div>
+                <div class="document-type">
+                  <span class="badge badge-{{ doc.type }}">
+                    {{ doc.type|capitalize }}
+                  </span>
+                </div>
+                <div class="document-date">{{ doc.date_ajout|datetimeformat('%d/%m/%Y') }}</div>
+                <div class="document-size">{{ doc.taille }}</div>
+                <div class="document-actions">
+                  <button class="btn-icon" title="Télécharger" onclick="downloadDocument('{{ doc.id }}')">
+                    <i class="fas fa-download"></i>
+                  </button>
+                  <button class="btn-icon" title="Partager" onclick="shareDocument('{{ doc.id }}')">
+                    <i class="fas fa-share-alt"></i>
+                  </button>
+                  <button class="btn-icon" title="Supprimer" onclick="deleteDocument('{{ doc.id }}')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <i class="far fa-folder-open"></i>
+                <h3>Aucun document trouvé</h3>
+                <p>Commencez par ajouter vos premiers documents médicaux</p>
+              </div>
+            {% endif %}
+          </div>
+          
+          {% if documents %}
+          <div class="documents-footer">
+            <div class="documents-count">{{ documents|length }} documents</div>
+            <div class="pagination">
+              <button class="btn btn-outline btn-sm" disabled>
+                <i class="fas fa-chevron-left"></i> Précédent
+              </button>
+              <span>Page 1 sur 1</span>
+              <button class="btn btn-outline btn-sm" disabled>
+                Suivant <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Modal de partage -->
+  <div id="shareModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Partager un document</h3>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="shareEmail">Adresse email du destinataire</label>
+          <input type="email" id="shareEmail" class="form-input" placeholder="email@exemple.com">
+        </div>
+        <div class="form-group">
+          <label for="shareMessage">Message (optionnel)</label>
+          <textarea id="shareMessage" class="form-input" rows="3" placeholder="Voici le document que vous avez demandé..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input type="checkbox" id="shareCanEdit" checked>
+            <span class="checkmark"></span>
+            Le destinataire peut modifier le document
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline close-modal">Annuler</button>
+        <button id="confirmShare" class="btn btn-primary">Partager</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+  <script>
+    // Initialisation de Dropzone
+    Dropzone.autoDiscover = false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configuration de la zone de dépôt
+      const dropzone = new Dropzone("#dropzone", {
+        url: "/api/documents/upload",
+        paramName: "document",
+        maxFilesize: 10, // Mo
+        acceptedFiles: ".pdf,.jpg,.jpeg,.png,.doc,.docx",
+        maxFiles: 5,
+        addRemoveLinks: true,
+        dictDefaultMessage: "",
+        autoProcessQueue: false,
+        uploadMultiple: true,
+        parallelUploads: 5,
+        clickable: ["#uploadBtn", "#dropzone"]
+      });
+      
+      // Gestion des événements Dropzone
+      dropzone.on("addedfile", function(file) {
+        console.log("Fichier ajouté :", file.name);
+        // Afficher un aperçu pour les images
+        if (file.type.match('image.*')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.classList.add('thumbnail');
+            file.previewElement.querySelector('.dz-image').innerHTML = '';
+            file.previewElement.querySelector('.dz-image').appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      dropzone.on("success", function(file, response) {
+        console.log("Fichier téléversé avec succès :", file.name);
+        // Ajouter le document à la liste
+        addDocumentToList(response.document);
+      });
+      
+      dropzone.on("error", function(file, message) {
+        console.error("Erreur lors du téléversement :", message);
+        alert("Une erreur est survenue lors du téléversement du fichier.");
+      });
+      
+      // Gestion de la modale de partage
+      const shareModal = document.getElementById('shareModal');
+      const closeButtons = document.querySelectorAll('.close-modal');
+      let currentDocumentId = null;
+      
+      function openShareModal(documentId) {
+        currentDocumentId = documentId;
+        shareModal.style.display = 'block';
+      }
+      
+      function closeShareModal() {
+        shareModal.style.display = 'none';
+        currentDocumentId = null;
+        document.getElementById('shareEmail').value = '';
+        document.getElementById('shareMessage').value = '';
+        document.getElementById('shareCanEdit').checked = true;
+      }
+      
+      // Fermer la modale en cliquant sur la croix ou en dehors
+      closeButtons.forEach(button => {
+        button.addEventListener('click', closeShareModal);
+      });
+      
+      window.addEventListener('click', function(e) {
+        if (e.target === shareModal) {
+          closeShareModal();
+        }
+      });
+      
+      // Confirmer le partage
+      document.getElementById('confirmShare').addEventListener('click', function() {
+        if (!currentDocumentId) return;
+        
+        const email = document.getElementById('shareEmail').value;
+        const message = document.getElementById('shareMessage').value;
+        const canEdit = document.getElementById('shareCanEdit').checked;
+        
+        if (!email) {
+          alert('Veuillez entrer une adresse email valide.');
+          return;
+        }
+        
+        // Ici, vous pourriez ajouter un appel AJAX pour partager le document
+        console.log(`Partage du document ${currentDocumentId} avec ${email} (édition ${canEdit ? 'autorisée' : 'non autorisée'})`);
+        
+        // Exemple d'appel AJAX (à décommenter et adapter)
+        /*
+        fetch(`/api/documents/${currentDocumentId}/share`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            message: message,
+            canEdit: canEdit
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Le document a été partagé avec succès.');
+            closeShareModal();
+          } else {
+            alert('Une erreur est survenue lors du partage du document.');
+          }
+        });
+        */
+      });
+      
+      // Fonctions utilitaires
+      function addDocumentToList(document) {
+        // Implémentez l'ajout dynamique d'un document à la liste
+        console.log("Ajout du document à la liste :", document);
+      }
+      
+      // Exposer les fonctions globales
+      window.downloadDocument = function(id) {
+        console.log("Téléchargement du document :", id);
+        // window.location.href = `/api/documents/${id}/download`;
+      };
+      
+      window.shareDocument = function(id) {
+        openShareModal(id);
+      };
+      
+      window.deleteDocument = function(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.')) {
+          console.log("Suppression du document :", id);
+          // Ici, vous pourriez ajouter un appel AJAX pour supprimer le document
+          // Puis supprimer l'élément du DOM
+          // document.querySelector(`.document-item[data-id="${id}"]`).remove();
+        }
+      };
+    });
+  </script>
+</body>
+</html>

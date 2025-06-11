@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - {{ nom_site }}{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="container">
+      <h1>Trouvez un professionnel de santé</h1>
+      <form class="search-form" action="{{ url_for('liste_praticiens') }}" method="GET">
+        <input type="text" name="q" placeholder="Médecin, dentiste, spécialité..." required>
+        <input type="text" name="location" placeholder="Ville ou code postal" required>
+        <button type="submit">
+          <i class="fas fa-search"></i> Rechercher
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <h2>Votre partenaire santé au quotidien</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <img src="{{ url_for('static', filename='img/icon1.png') }}" alt="Accès soins">
+          <h3>Accédez aux soins plus facilement</h3>
+          <p>Réservez des consultations vidéo ou en présentiel, et recevez des rappels pour ne jamais les manquer.</p>
+        </div>
+        <div class="feature-item">
+          <img src="{{ url_for('static', filename='img/icon2.png') }}" alt="Soins personnalisés">
+          <h3>Bénéficiez de soins personnalisés</h3>
+          <p>Échangez avec vos soignants par message, obtenez des conseils préventifs et recevez des soins quand vous en avez besoin.</p>
+        </div>
+        <div class="feature-item">
+          <img src="{{ url_for('static', filename='img/icon3.png') }}" alt="Gérez santé">
+          <h3>Gérez votre santé</h3>
+          <p>Rassemblez facilement toutes vos informations de santé et celles de ceux qui comptent pour vous.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

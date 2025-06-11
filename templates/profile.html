@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Profil - MaSanté</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    {% include 'dashboard_sidebar.html' %}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Mon Profil</h1>
+      </header>
+      
+      <div class="profile-container">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              {% set initials = user.nom.split(' ') | map('first') | join %}
+              {{ initials }}
+            </div>
+            <div class="profile-info">
+              <h2>{{ user.nom }} {{ user.prenom }}</h2>
+              <p>Membre depuis {{ user.date_inscription | datetimeformat('%d/%m/%Y') }}</p>
+            </div>
+          </div>
+          
+          <div class="profile-details">
+            <div class="detail-group">
+              <h3>Informations personnelles</h3>
+              <div class="detail-item">
+                <i class="fas fa-envelope"></i>
+                <div>
+                  <span class="label">Email</span>
+                  <span class="value">{{ user.email }}</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-phone"></i>
+                <div>
+                  <span class="label">Téléphone</span>
+                  <span class="value">{{ user.telephone or 'Non renseigné' }}</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-birthday-cake"></i>
+                <div>
+                  <span class="label">Date de naissance</span>
+                  <span class="value">{{ user.date_naissance | datetimeformat('%d/%m/%Y') if user.date_naissance else 'Non renseignée' }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Adresse</h3>
+              <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                  <span class="value">
+                    {% if user.adresse %}
+                      {{ user.adresse }}<br>
+                      {% if user.complement %}{{ user.complement }}<br>{% endif %}
+                      {{ user.code_postal }} {{ user.ville }}
+                    {% else %}
+                      Non renseignée
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Sécurité</h3>
+              <div class="detail-item">
+                <i class="fas fa-lock"></i>
+                <div>
+                  <span class="label">Mot de passe</span>
+                  <span class="value">•••••••••</span>
+                </div>
+                <a href="{{ url_for('change_password') }}" class="btn btn-link">Modifier</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="profile-actions">
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+              <i class="fas fa-edit"></i> Modifier le profil
+            </a>
+          </div>
+        </div>
+        
+        <div class="profile-sidebar">
+          <div class="stats-card">
+            <h3>Statistiques</h3>
+            <div class="stat-item">
+              <i class="fas fa-calendar-check"></i>
+              <div>
+                <span class="number">{{ stats.rdv_passes or 0 }}</span>
+                <span class="label">Rendez-vous passés</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-user-md"></i>
+              <div>
+                <span class="number">{{ stats.medecins or 0 }}</span>
+                <span class="label">Médecins consultés</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-file-medical"></i>
+              <div>
+                <span class="number">{{ stats.documents or 0 }}</span>
+                <span class="label">Documents partagés</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="preferences-card">
+            <h3>Préférences</h3>
+            <div class="preference-item">
+              <span>Notifications par email</span>
+              <label class="switch">
+                <input type="checkbox" {% if user.preferences.notifications_email %}checked{% endif %}>
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <div class="preference-item">
+              <span>Notifications SMS</span>
+              <label class="switch">
+                <input type="checkbox" {% if user.preferences.notifications_sms %}checked{% endif %}>
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Script pour la gestion des préférences
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gestion des switchs de préférences
+      const switches = document.querySelectorAll('.switch input[type="checkbox"]');
+      switches.forEach(switchInput => {
+        switchInput.addEventListener('change', function() {
+          const preference = this.parentElement.previousElementSibling.textContent.trim();
+          const isEnabled = this.checked;
+          
+          // Ici, vous pourriez ajouter un appel AJAX pour sauvegarder la préférence
+          console.log(`${preference} ${isEnabled ? 'activé' : 'désactivé'}`);
+          
+          // Exemple d'appel AJAX (à décommenter et adapter)
+          /*
+          fetch('/api/update_preference', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              preference: preference,
+              value: isEnabled
+            })
+          });
+          */
+        });
+      });
+    });
+  </script>
+</body>
+</html>

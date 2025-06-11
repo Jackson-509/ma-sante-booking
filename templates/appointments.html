@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Rendez-vous - MaSanté</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    {% include 'dashboard_sidebar.html' %}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Mes Rendez-vous</h1>
+        <div class="header-actions">
+          <a href="{{ url_for('liste_praticiens') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau rendez-vous
+          </a>
+        </div>
+      </header>
+      
+      <div class="appointments-filters">
+        <div class="filter-group">
+          <label for="status-filter">Statut :</label>
+          <select id="status-filter" class="form-select">
+            <option value="all">Tous les rendez-vous</option>
+            <option value="upcoming">À venir</option>
+            <option value="past">Passés</option>
+            <option value="canceled">Annulés</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="date-filter">Période :</label>
+          <input type="text" id="date-filter" class="form-input date-range" placeholder="Sélectionner une période">
+        </div>
+        
+        <div class="filter-group">
+          <label for="search">Rechercher :</label>
+          <div class="search-input">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search" placeholder="Médecin, spécialité...">
+          </div>
+        </div>
+      </div>
+      
+      <div class="appointments-container">
+        {% if rdvs %}
+          <div class="appointments-list">
+            {% for rdv in rdvs %}
+            <div class="appointment-card {% if rdv.statut == 'annulé' %}cancelled{% elif rdv.statut == 'terminé' %}past{% endif %}" data-date="{{ rdv.date }}">
+              <div class="appointment-date">
+                <div class="date-day">{{ rdv.date|datetimeformat('%d') }}</div>
+                <div class="date-month">{{ rdv.date|datetimeformat('%b') }}</div>
+                <div class="date-time">{{ rdv.heure_debut|datetimeformat('%H:%M') }}</div>
+              </div>
+              
+              <div class="appointment-details">
+                <div class="appointment-header">
+                  <h3>{{ rdv.praticien.nom }}</h3>
+                  <span class="status-badge {{ rdv.statut }}">
+                    {{ rdv.statut|capitalize }}
+                  </span>
+                </div>
+                
+                <p class="specialty">{{ rdv.praticien.specialite }}</p>
+                
+                <div class="appointment-info">
+                  <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    {{ rdv.heure_debut|datetimeformat('%H:%M') }} - {{ rdv.heure_fin|datetimeformat('%H:%M') }}
+                  </div>
+                  <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ rdv.praticien.adresse.ville }}
+                  </div>
+                  {% if rdv.motif %}
+                  <div class="info-item">
+                    <i class="fas fa-sticky-note"></i>
+                    {{ rdv.motif }}
+                  </div>
+                  {% endif %}
+                </div>
+                
+                <div class="appointment-actions">
+                  {% if rdv.statut == 'confirmé' %}
+                    <a href="#" class="btn btn-outline btn-sm cancel-appointment" data-id="{{ rdv.id }}">
+                      <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <a href="#" class="btn btn-outline btn-sm" data-id="{{ rdv.id }}">
+                      <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="#" class="btn btn-primary btn-sm" data-id="{{ rdv.id }}">
+                      <i class="fas fa-video"></i> Se connecter
+                    </a>
+                  {% elif rdv.statut == 'annulé' %}
+                    <button class="btn btn-outline btn-sm" disabled>
+                      Rendez-vous annulé
+                    </button>
+                  {% else %}
+                    <a href="#" class="btn btn-outline btn-sm">
+                      <i class="fas fa-file-medical"></i> Voir l'ordonnance
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <div class="pagination">
+            <button class="btn btn-outline" disabled>
+              <i class="fas fa-chevron-left"></i> Précédent
+            </button>
+            <div class="page-numbers">
+              <span class="active">1</span>
+              <a href="#">2</a>
+              <a href="#">3</a>
+              <span>...</span>
+              <a href="#">10</a>
+            </div>
+            <button class="btn btn-outline">
+              Suivant <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <i class="far fa-calendar-plus"></i>
+            <h3>Aucun rendez-vous trouvé</h3>
+            <p>Vous n'avez pas encore de rendez-vous de planifié.</p>
+            <a href="{{ url_for('liste_praticiens') }}" class="btn btn-primary">
+              Prendre un rendez-vous
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+  
+  <!-- Modal d'annulation -->
+  <div id="cancelModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Annuler le rendez-vous</h3>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir annuler ce rendez-vous ?</p>
+        <div class="form-group">
+          <label for="cancelReason">Raison de l'annulation (facultatif) :</label>
+          <textarea id="cancelReason" class="form-input" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline close-modal">Non, garder le rendez-vous</button>
+        <button id="confirmCancel" class="btn btn-danger">Oui, annuler le rendez-vous</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+  <script>
+    // Initialisation du sélecteur de date
+    flatpickr("#date-filter", {
+      mode: "range",
+      locale: "fr",
+      dateFormat: "d/m/Y",
+      allowInput: true
+    });
+    
+    // Gestion de la modale d'annulation
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('cancelModal');
+      const cancelButtons = document.querySelectorAll('.cancel-appointment');
+      const closeButtons = document.querySelectorAll('.close-modal');
+      const confirmCancel = document.getElementById('confirmCancel');
+      let currentAppointmentId = null;
+      
+      // Ouvrir la modale
+      cancelButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          currentAppointmentId = this.getAttribute('data-id');
+          modal.style.display = 'block';
+        });
+      });
+      
+      // Fermer la modale
+      function closeModal() {
+        modal.style.display = 'none';
+        currentAppointmentId = null;
+        document.getElementById('cancelReason').value = '';
+      }
+      
+      closeButtons.forEach(button => {
+        button.addEventListener('click', closeModal);
+      });
+      
+      window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+      
+      // Confirmer l'annulation
+      confirmCancel.addEventListener('click', function() {
+        if (!currentAppointmentId) return;
+        
+        const reason = document.getElementById('cancelReason').value;
+        
+        // Ici, vous pourriez ajouter un appel AJAX pour annuler le rendez-vous
+        console.log(`Annulation du RDV ${currentAppointmentId} avec raison : ${reason}`);
+        
+        // Exemple d'appel AJAX (à décommenter et adapter)
+        /*
+        fetch(`/api/appointments/${currentAppointmentId}/cancel`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            reason: reason
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Mettre à jour l'interface utilisateur
+            const appointmentCard = document.querySelector(`.appointment-card[data-id="${currentAppointmentId}"]`);
+            if (appointmentCard) {
+              appointmentCard.classList.add('cancelled');
+              appointmentCard.querySelector('.status-badge').textContent = 'Annulé';
+              appointmentCard.querySelector('.appointment-actions').innerHTML = `
+                <button class="btn btn-outline btn-sm" disabled>
+                  Rendez-vous annulé
+                </button>
+              `;
+            }
+            
+            // Afficher un message de succès
+            alert('Le rendez-vous a été annulé avec succès.');
+          } else {
+            alert('Une erreur est survenue lors de l\'annulation du rendez-vous.');
+          }
+        });
+        */
+        
+        closeModal();
+      });
+      
+      // Filtrage des rendez-vous
+      const statusFilter = document.getElementById('status-filter');
+      const searchInput = document.getElementById('search');
+      
+      function filterAppointments() {
+        const status = statusFilter.value;
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        document.querySelectorAll('.appointment-card').forEach(card => {
+          const cardStatus = card.classList.contains('cancelled') ? 'annulé' : 
+                            card.classList.contains('past') ? 'terminé' : 'confirmé';
+          const doctorName = card.querySelector('h3').textContent.toLowerCase();
+          const specialty = card.querySelector('.specialty').textContent.toLowerCase();
+          
+          const statusMatch = status === 'all' || 
+                            (status === 'upcoming' && cardStatus === 'confirmé') ||
+                            (status === 'past' && cardStatus === 'terminé') ||
+                            (status === 'canceled' && cardStatus === 'annulé');
+          
+          const searchMatch = !searchTerm || 
+                            doctorName.includes(searchTerm) || 
+                            specialty.includes(searchTerm);
+          
+          if (statusMatch && searchMatch) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+      
+      statusFilter.addEventListener('change', filterAppointments);
+      searchInput.addEventListener('input', filterAppointments);
+    });
+  </script>
+</body>
+</html>

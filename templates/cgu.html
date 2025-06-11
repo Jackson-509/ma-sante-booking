@@ -1,0 +1,17 @@
+<h1>Conditions Générales d'Utilisation</h1>
+<p>Bienvenue sur le site {nom_site}. Les présentes conditions régissent l'utilisation du service proposé.</p>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; {{ nom_site }} - Tous droits réservés</p>
+    <nav class="footer-links">
+      <a href="{{ url_for('cgu') }}">CGU</a>
+      <span>|</span>
+      <a href="{{ url_for('mentions_legales') }}">Mentions légales</a>
+      <span>|</span>
+      <a href="{{ url_for('politique_confidentialite') }}">Confidentialité</a>
+      <span>|</span>
+      <a href="{{ url_for('parametres_cookies') }}">Cookies</a>
+    </nav>
+  </div>
+</footer>

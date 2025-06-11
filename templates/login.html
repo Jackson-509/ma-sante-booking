@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - MaSanté</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>Connexion</h1>
+        <p>Accédez à votre espace personnel</p>
+      </div>
+      
+      <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <div class="form-group">
+          <label for="email">Adresse email</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <div class="form-header">
+            <label for="password">Mot de passe</label>
+            <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" required>
+            <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-group remember-me">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Se souvenir de moi</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block">
+          Se connecter
+        </button>
+        
+        <div class="auth-footer">
+          <p>Vous n'avez pas de compte ? <a href="{{ url_for('register') }}">Créer un compte</a></p>
+        </div>
+      </form>
+      
+      <div class="auth-divider">
+        <span>ou</span>
+      </div>
+      
+      <div class="social-login">
+        <button type="button" class="btn btn-social btn-google">
+          <i class="fab fa-google"></i>
+          Continuer avec Google
+        </button>
+        <button type="button" class="btn btn-social btn-facebook">
+          <i class="fab fa-facebook-f"></i>
+          Continuer avec Facebook
+        </button>
+      </div>
+    </div>
+    
+    <div class="auth-image">
+      <div class="overlay">
+        <h2>Bienvenue sur MaSanté</h2>
+        <p>Prenez rendez-vous avec des professionnels de santé en quelques clics</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function() {
+        const passwordInput = this.previousElementSibling;
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          passwordInput.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
