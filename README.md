@@ -5,7 +5,7 @@ Ce site est généré automatiquement.
 - Couleur principale : #00838f
 - Dossier : C:\Users\arist\Downloads\Ma_sante_booking-main\Ma_santé
 
-## Structure du projet
+# Structure du projet
 
 ```
 generate_project.py   # Script de génération
